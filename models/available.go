@@ -3,11 +3,16 @@ package models
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/beego/beego/v2/client/httplib"
-	"github.com/beego/beego/v2/core/logs"
+	"io/ioutil"
+	"log"
+	"net/http"
 	"net/url"
+	"os"
 	"strings"
 	"time"
+
+	"github.com/beego/beego/v2/client/httplib"
+	"github.com/beego/beego/v2/core/logs"
 )
 
 type UserInfoResult struct {
@@ -229,15 +234,69 @@ func CookieOK(ck *JdCookie) bool {
 	if ck == nil {
 		return true
 	}
-	req := httplib.Get("https://me-api.jd.com/user_new/info/GetJDUserInfoUnion")
-	req.Header("Cookie", cookie)
-	req.Header("Accept", "*/*")
-	req.Header("Accept-Language", "zh-cn,")
-	req.Header("Connection", "keep-alive,")
-	req.Header("Referer", "https://home.m.jd.com/myJd/newhome.action?sceneval=2&ufc=&")
-	req.Header("Host", "me-api.jd.com")
-	req.Header("User-Agent", "jdapp;iPhone;9.4.4;14.3;network/4g;Mozilla/5.0 (iPhone; CPU iPhone OS 14_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1")
-	data, err := req.Bytes()
+	uri, err := url.Parse("http://113.238.142.208:3128/")
+
+	if err != nil {
+		log.Fatal("parse url error: ", err)
+	}
+	log.Println(uri.User)
+
+	client := http.Client{
+		Transport: &http.Transport{
+			// 设置代理
+			Proxy: http.ProxyURL(uri),
+		},
+	}
+	//模拟ios客户端发送get请求
+	// client := new(http.Client)
+	reg, err := http.NewRequest("GET", `https://me-api.jd.com/user_new/info/GetJDUserInfoUnion`, nil)
+	// reg, err := http.NewRequest("GET", `https://www.cip.cc/`, nil)
+	if err != nil {
+		fmt.Println("Error1:", err)
+		return true
+	}
+	reg.Header.Add(`HTTP`, `2.0`)
+	reg.Header.Add(`Accept`, `*/*`)
+	reg.Header.Add(`Accept-Language`, `zh-cn`)
+	reg.Header.Add(`User-Agent`, `AppStore/2.0 iOS/7.1.2 model/iPod5,1 build/11D257 (4; dt:81)`)
+	reg.Header.Add(`Host`, `itunes.apple.com`)
+	reg.Header.Add(`Connection`, `keep-alive`)
+	reg.Header.Add(`X-Apple-Store-Front`, `143465-19,21 t:native`)
+	reg.Header.Add(`X-Dsid`, `932530590`)
+	reg.Header.Add("Cookie", cookie)
+	// reg.Header.Set("Accept", "*/*")
+	// reg.Header.Set("Accept-Language", "zh-cn,")
+	// reg.Header.Set("Connection", "keep-alive,")
+	// reg.Header.Set("Referer", "https://home.m.jd.com/myJd/newhome.action?sceneval=2&ufc=&")
+	// reg.Header.Set("Host", "me-api.jd.com")
+	// reg.Header.Set("User-Agent", "jdapp;iPhone;9.4.4;14.3;network/4g;Mozilla/5.0 (iPhone; CPU iPhone OS 14_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1")
+	//reg.Header.Set(`Cookie`, `xp_ci=3z1E7umazD0Dz5SBzCwNzB7weVKgD; s_vi=[CS]v1|29F61F868501299A-60000114E000452B[CE]; Pod=20; itspod=20; xt-src=b; xt-b-ts-932530590=1408324780262; mz_at_ssl-932530590=AwUAAAFRAAER1gAAAABT8vlrAo2EAZQvwAJjChIlGtIxIKYErLQ=; mz_at0-932530590=AwQAAAFRAAER1gAAAABT8VSrdHM0dXgdzosavj4+sT0AJfhYBx4=; wosid-lite=qQmZVeBH9vj91TakAeKEZg; ns-mzf-inst=35-163-80-118-68-8171-202429-20-nk11; X-Dsid=932530590`)
+
+	//执行get请求
+	resp, err := client.Do(reg)
+	if err != nil {
+		return true
+	}
+	defer resp.Body.Close()
+	if err != nil {
+		fmt.Println("Error2:", err.Error())
+		os.Exit(1)
+		return true
+	}
+	//分隔符
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return true
+	}
+	// req := httplib.Get("https://me-api.jd.com/user_new/info/GetJDUserInfoUnion")
+	// req.Header("Cookie", cookie)
+	// req.Header("Accept", "*/*")
+	// req.Header("Accept-Language", "zh-cn,")
+	// req.Header("Connection", "keep-alive,")
+	// req.Header("Referer", "https://home.m.jd.com/myJd/newhome.action?sceneval=2&ufc=&")
+	// req.Header("Host", "me-api.jd.com")
+	// req.Header("User-Agent", "jdapp;iPhone;9.4.4;14.3;network/4g;Mozilla/5.0 (iPhone; CPU iPhone OS 14_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1")
+	// data, err := req.Bytes()
 	if err != nil {
 		return true
 	}

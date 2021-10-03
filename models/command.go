@@ -5,12 +5,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/beego/beego/v2/client/httplib"
-	"github.com/beego/beego/v2/core/logs"
 	"io/ioutil"
 	"regexp"
 	"strings"
 	"time"
+
+	"github.com/beego/beego/v2/client/httplib"
+	"github.com/beego/beego/v2/core/logs"
 
 	"gorm.io/gorm"
 )
@@ -95,8 +96,8 @@ func (sender *Sender) handleJdCookies(handle func(ck *JdCookie)) error {
 			}
 		}
 		if !ok {
-			sender.Reply("你尚未绑定🐶东账号，请提交wskey，提交后即可查询账户资产信息。")
-			return errors.New("你尚未绑定🐶东账号，请提交wskey，提交后即可查询账户资产信息。")
+			sender.Reply("你尚未绑定🐶东账号，请提交ck，提交后即可查询账户资产信息。")
+			return errors.New("你尚未绑定🐶东账号，请提交ck，提交后即可查询账户资产信息。")
 		}
 	} else {
 		cks = LimitJdCookie(cks, a)
@@ -963,7 +964,7 @@ var codeSignals = []CodeSignal{
 			return nil
 		},
 	},
-    {
+	{
 		Command: []string{"导出wsk"},
 		Admin:   true,
 		Handle: func(sender *Sender) interface{} {
