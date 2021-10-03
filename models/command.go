@@ -274,6 +274,16 @@ var codeSignals = []CodeSignal{
 		},
 	},
 	{
+		Command: []string{"检查", "检查账号"},
+		Admin:   true,
+		Handle: func(sender *Sender) interface{} {
+			sender.Reply("检查所有账号")
+			logs.Info("检查所有账号")
+			initCookie()
+			return nil
+		},
+	},
+	{
 		Command: []string{"重启", "reload", "restart", "reboot"},
 		Admin:   true,
 		Handle: func(sender *Sender) interface{} {
