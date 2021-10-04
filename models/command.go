@@ -391,6 +391,19 @@ var codeSignals = []CodeSignal{
 			return "已取消管理员"
 		},
 	},
+	{
+		Command: []string{"QQ转账"},
+		Admin:   true,
+		Handle: func(sender *Sender) interface{} {
+			qq := Int(sender.Contents[0])
+			if len(sender.Contents) > 1 {
+				sender.Contents = sender.Contents[1:]
+				AdddCoin(qq, Int(sender.Contents[1]))
+				sender.Reply(fmt.Sprintf("你获得%d枚互助值。", Int(sender.Contents[1])))
+			}
+			return nil
+		},
+	},
 	/*
 		{
 			Command: []string{"我要钱", "给点钱", "我干", "给我钱", "给我", "我要"},
