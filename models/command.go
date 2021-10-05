@@ -639,7 +639,7 @@ var codeSignals = []CodeSignal{
 		},
 	},
 	{
-		Command: []string{"绑定"},
+		Command: []string{"绑定QQ"},
 		Handle: func(sender *Sender) interface{} {
 			qq := Int(sender.Contents[0])
 			if len(sender.Contents) > 1 {
@@ -647,6 +647,20 @@ var codeSignals = []CodeSignal{
 				sender.handleJdCookies(func(ck *JdCookie) {
 					ck.Update(QQ, qq)
 					sender.Reply(fmt.Sprintf("已设置账号%s的QQ为%v。", ck.Nickname, ck.QQ))
+				})
+			}
+			return nil
+		},
+	},
+	{
+		Command: []string{"绑定TG"},
+		Handle: func(sender *Sender) interface{} {
+			TG := Int(sender.Contents[0])
+			if len(sender.Contents) > 1 {
+				sender.Contents = sender.Contents[1:]
+				sender.handleJdCookies(func(ck *JdCookie) {
+					ck.Update(Telegram, TG)
+					sender.Reply(fmt.Sprintf("已设置账号%s的TGid为%v。", ck.Nickname, ck.Telegram))
 				})
 			}
 			return nil
@@ -735,6 +749,12 @@ var codeSignals = []CodeSignal{
 		Command: []string{"。。。"},
 		Handle: func(sender *Sender) interface{} {
 			return "你很无语吗？"
+		},
+	},
+	{
+		Command: []string{"绑定"},
+		Handle: func(sender *Sender) interface{} {
+			return "绑定QQ按照：绑定QQ 京东用户名 QQ；绑定TG按照：绑定TG 京东用户名 TGID(注意：空格不能少，用户名不是昵称)？"
 		},
 	},
 	{
