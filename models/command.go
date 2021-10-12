@@ -141,7 +141,7 @@ var codeSignals = []CodeSignal{
 	{
 		Command: []string{"qrcode", "扫码", "二维码", "scan"},
 		Handle: func(sender *Sender) interface{} {
-			sender.Reply(fmt.Sprintf("https://z3.ax1x.com/2021/10/09/5FbY80.jpg"))
+			sender.Reply(fmt.Sprintf("请添加代理，IP：114.96.96.79，端口：8101"))
 			url := fmt.Sprintf("http://127.0.0.1:%d/api/login/qrcode.png?tp=%s&uid=%d&gid=%d", web.BConfig.Listen.HTTPPort, sender.Type, sender.UserID, sender.ChatID)
 			if sender.Type == "tgg" {
 				url += fmt.Sprintf("&mid=%v&unm=%v", sender.MessageID, sender.Username)
