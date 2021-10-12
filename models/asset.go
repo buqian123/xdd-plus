@@ -221,7 +221,7 @@ func (ck *JdCookie) Query() string {
 
 	} else {
 		msgs = append(msgs, []string{
-			"提醒：该账号已过期，请重新登录，QQ请添加机器人为好友，更新成功有提示。务必看到提示，如没有提示，请删除机器人好友重新加。",
+			"提醒：该账号已过期，请重新登录，请对我说扫码重新登录。QQ发送ck请添加机器人为好友，更新成功有提示。务必看到提示，如没有提示，请删除机器人好友重新加。",
 		}...)
 	}
 	ck.PtPin, _ = url.QueryUnescape(ck.PtPin)
