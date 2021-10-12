@@ -398,10 +398,12 @@ var codeSignals = []CodeSignal{
 		Admin:   true,
 		Handle: func(sender *Sender) interface{} {
 			qq := Int(sender.Contents[0])
+			logs.Info(qq)
 			if len(sender.Contents) > 1 {
-				sender.Contents = sender.Contents[1:]
+				//sender.Contents = sender.Contents[1:]
+				logs.Info(sender.Contents[1:])
 				AdddCoin(qq, Int(sender.Contents[1]))
-				sender.Reply(fmt.Sprintf("你获得%d枚互助值。", Int(sender.Contents[1])))
+				sender.Reply(fmt.Sprintf("%d已增加%d枚互助值。", qq, Int(sender.Contents[1])))
 			}
 			return nil
 		},
