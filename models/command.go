@@ -178,65 +178,65 @@ var codeSignals = []CodeSignal{
 	//		return "data:image/png;base64," + s.Data.QqLoginQrcode.Bytes
 	//	},
 	//},
-	{
-		Command: []string{"sign", "打卡", "签到"},
-		Handle: func(sender *Sender) interface{} {
-			//if sender.Type == "tgg" {
-			//	sender.Type = "tg"
-			//}
-			//if sender.Type == "qqg" {
-			//	sender.Type = "qq"
-			//}
-			zero, _ := time.ParseInLocation("2006-01-02", time.Now().Local().Format("2006-01-02"), time.Local)
-			var u User
-			var ntime = time.Now()
-			var first = false
-			total := []int{}
-			err := db.Where("number = ?", sender.UserID).First(&u).Error
-			if err != nil {
-				first = true
-				u = User{
-					Class:    sender.Type,
-					Number:   sender.UserID,
-					Coin:     1,
-					ActiveAt: ntime,
-					Womail:   "",
-				}
-				if err := db.Create(&u).Error; err != nil {
-					return err.Error()
-				}
-			} else {
-				if zero.Unix() > u.ActiveAt.Unix() {
-					first = true
-				} else {
-					return fmt.Sprintf("你打过卡了，互助值余额%d。", u.Coin)
-				}
-			}
-			if first {
-				db.Model(User{}).Select("count(id) as total").Where("active_at > ?", zero).Pluck("total", &total)
-				coin := 1
-				if total[0]%3 == 0 {
-					coin = 2
-				}
-				if total[0]%13 == 0 {
-					coin = 8
-				}
-				db.Model(&u).Updates(map[string]interface{}{
-					"active_at": ntime,
-					"coin":      gorm.Expr(fmt.Sprintf("coin+%d", coin)),
-				})
-				u.Coin += coin
-				if u.Womail != "" {
-					rsp := cmd(fmt.Sprintf(`python3 womail.py "%s"`, u.Womail), &Sender{})
-					sender.Reply(fmt.Sprintf("%s", rsp))
-				}
-				sender.Reply(fmt.Sprintf("你是打卡第%d人，奖励%d个互助值，互助值余额%d。", total[0]+1, coin, u.Coin))
-				ReturnCoin(sender)
-				return ""
-			}
-			return nil
-		},
-	},
+	// {
+	// 	Command: []string{"sign", "打卡", "签到"},
+	// 	Handle: func(sender *Sender) interface{} {
+	// 		//if sender.Type == "tgg" {
+	// 		//	sender.Type = "tg"
+	// 		//}
+	// 		//if sender.Type == "qqg" {
+	// 		//	sender.Type = "qq"
+	// 		//}
+	// 		zero, _ := time.ParseInLocation("2006-01-02", time.Now().Local().Format("2006-01-02"), time.Local)
+	// 		var u User
+	// 		var ntime = time.Now()
+	// 		var first = false
+	// 		total := []int{}
+	// 		err := db.Where("number = ?", sender.UserID).First(&u).Error
+	// 		if err != nil {
+	// 			first = true
+	// 			u = User{
+	// 				Class:    sender.Type,
+	// 				Number:   sender.UserID,
+	// 				Coin:     1,
+	// 				ActiveAt: ntime,
+	// 				Womail:   "",
+	// 			}
+	// 			if err := db.Create(&u).Error; err != nil {
+	// 				return err.Error()
+	// 			}
+	// 		} else {
+	// 			if zero.Unix() > u.ActiveAt.Unix() {
+	// 				first = true
+	// 			} else {
+	// 				return fmt.Sprintf("你打过卡了，互助值余额%d。", u.Coin)
+	// 			}
+	// 		}
+	// 		if first {
+	// 			db.Model(User{}).Select("count(id) as total").Where("active_at > ?", zero).Pluck("total", &total)
+	// 			coin := 1
+	// 			if total[0]%3 == 0 {
+	// 				coin = 2
+	// 			}
+	// 			if total[0]%13 == 0 {
+	// 				coin = 8
+	// 			}
+	// 			db.Model(&u).Updates(map[string]interface{}{
+	// 				"active_at": ntime,
+	// 				"coin":      gorm.Expr(fmt.Sprintf("coin+%d", coin)),
+	// 			})
+	// 			u.Coin += coin
+	// 			if u.Womail != "" {
+	// 				rsp := cmd(fmt.Sprintf(`python3 womail.py "%s"`, u.Womail), &Sender{})
+	// 				sender.Reply(fmt.Sprintf("%s", rsp))
+	// 			}
+	// 			sender.Reply(fmt.Sprintf("你是打卡第%d人，奖励%d个互助值，互助值余额%d。", total[0]+1, coin, u.Coin))
+	// 			ReturnCoin(sender)
+	// 			return ""
+	// 		}
+	// 		return nil
+	// 	},
+	// },
 	{
 		Command: []string{"清零"},
 		Admin:   true,
@@ -249,8 +249,7 @@ var codeSignals = []CodeSignal{
 			return nil
 		},
 	},
-	{
-		Command: []string{"更新优先级", "更新车位"},
+	{*Command: []string{"更新优先级", "更新车位"},
 		Handle: func(sender *Sender) interface{} {
 			coin := GetCoin(sender.UserID)
 			t := time.Now()
