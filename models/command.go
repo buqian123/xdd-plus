@@ -7,9 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/beego/beego/v2/client/httplib"
 	"github.com/beego/beego/v2/core/logs"
-	"github.com/beego/beego/v2/server/web"
 
 	"gorm.io/gorm"
 )
@@ -94,8 +92,8 @@ func (sender *Sender) handleJdCookies(handle func(ck *JdCookie)) error {
 			}
 		}
 		if !ok {
-			sender.Reply("你尚未绑定🐶东账号，请对我说扫码或提交ck，提交后即可查询账户资产信息。")
-			return errors.New("你尚未绑定🐶东账号，请对我说扫码或提交ck，提交后即可查询账户资产信息。")
+			sender.Reply("你尚未绑定🐶东账号，请提交ck，提交后即可查询账户资产信息。")
+			return errors.New("你尚未绑定🐶东账号，请提交ck，提交后即可查询账户资产信息。")
 		}
 	} else {
 		cks = LimitJdCookie(cks, a)
@@ -138,21 +136,21 @@ var codeSignals = []CodeSignal{
 			return nil
 		},
 	},
-	{
-		Command: []string{"qrcode", "扫码", "二维码", "scan"},
-		Handle: func(sender *Sender) interface{} {
-			sender.Reply(fmt.Sprintf("请添加代理，IP：114.96.96.79，端口：8101"))
-			url := fmt.Sprintf("http://127.0.0.1:%d/api/login/qrcode.png?tp=%s&uid=%d&gid=%d", web.BConfig.Listen.HTTPPort, sender.Type, sender.UserID, sender.ChatID)
-			if sender.Type == "tgg" {
-				url += fmt.Sprintf("&mid=%v&unm=%v", sender.MessageID, sender.Username)
-			}
-			rsp, err := httplib.Get(url).Response()
-			if err != nil {
-				return nil
-			}
-			return rsp
-		},
-	},
+	// {
+	// 	Command: []string{"qrcode", "扫码", "二维码", "scan"},
+	// 	Handle: func(sender *Sender) interface{} {
+	// 		sender.Reply(fmt.Sprintf("请添加代理，IP：114.96.96.79，端口：8101"))
+	// 		url := fmt.Sprintf("http://127.0.0.1:%d/api/login/qrcode.png?tp=%s&uid=%d&gid=%d", web.BConfig.Listen.HTTPPort, sender.Type, sender.UserID, sender.ChatID)
+	// 		if sender.Type == "tgg" {
+	// 			url += fmt.Sprintf("&mid=%v&unm=%v", sender.MessageID, sender.Username)
+	// 		}
+	// 		rsp, err := httplib.Get(url).Response()
+	// 		if err != nil {
+	// 			return nil
+	// 		}
+	// 		return rsp
+	// 	},
+	// },
 	//{
 	//	Command: []string{"qrcode", "扫码", "二维码", "scan"},
 	//	Handle: func(sender *Sender) interface{} {
