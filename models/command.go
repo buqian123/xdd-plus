@@ -7,9 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/beego/beego/v2/client/httplib"
 	"github.com/beego/beego/v2/core/logs"
-	"github.com/beego/beego/v2/server/web"
 
 	"gorm.io/gorm"
 )
@@ -142,17 +140,18 @@ var codeSignals = []CodeSignal{
 		Command: []string{"qrcode", "扫码", "二维码", "scan"},
 		Handle: func(sender *Sender) interface{} {
 			sender.Reply(fmt.Sprintf("扫码死了，自己抓ck发给机器人，发之前务必加好友，发成功会有提示"))
-		// 	sender.Reply(fmt.Sprintf("请添加代理，IP：114.96.96.79，端口：8101"))
-		// 	url := fmt.Sprintf("http://127.0.0.1:%d/api/login/qrcode.png?tp=%s&uid=%d&gid=%d", web.BConfig.Listen.HTTPPort, sender.Type, sender.UserID, sender.ChatID)
-		// 	if sender.Type == "tgg" {
-		// 		url += fmt.Sprintf("&mid=%v&unm=%v", sender.MessageID, sender.Username)
-		// 	}
-		// 	rsp, err := httplib.Get(url).Response()
-		// 	if err != nil {
-		// 		return nil
-		// 	}
-		// 	return rsp
-		// },
+			// 	sender.Reply(fmt.Sprintf("请添加代理，IP：114.96.96.79，端口：8101"))
+			// 	url := fmt.Sprintf("http://127.0.0.1:%d/api/login/qrcode.png?tp=%s&uid=%d&gid=%d", web.BConfig.Listen.HTTPPort, sender.Type, sender.UserID, sender.ChatID)
+			// 	if sender.Type == "tgg" {
+			// 		url += fmt.Sprintf("&mid=%v&unm=%v", sender.MessageID, sender.Username)
+			// 	}
+			// 	rsp, err := httplib.Get(url).Response()
+			// 	if err != nil {
+			// 		return nil
+			// 	}
+			// 	return rsp
+			return nil
+		},
 	},
 	//{
 	//	Command: []string{"qrcode", "扫码", "二维码", "scan"},
