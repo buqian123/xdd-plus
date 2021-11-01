@@ -673,6 +673,7 @@ var codeSignals = []CodeSignal{
 	{
 		Command: []string{"绑定QQ"},
 		Handle: func(sender *Sender) interface{} {
+			sender.Reply(fmt.Sprintf("请按照:(绑定QQ QQ 京东用户名)这样的格式来绑定QQ(示例：绑定QQ 482729829 是小盘哦)"))
 			qq := Int(sender.Contents[0])
 			if len(sender.Contents) > 1 {
 				sender.Contents = sender.Contents[1:]
