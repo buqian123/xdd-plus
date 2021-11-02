@@ -83,7 +83,8 @@ func (ck *JdCookie) Query1() string {
 
 func (ck *JdCookie) Query() string {
 	msgs := []string{
-		fmt.Sprint("京享红包任性抢！！！狂撒15天，壕气挡不住！https://u.jd.com/ywQmyK9"),
+		fmt.Sprint("京享红包任性抢！！！狂撒15天，壕气挡不住！"),
+		fmt.Sprint("https://u.jd.com/yLOMWnq"),
 		fmt.Sprintf("账号昵称：%s", ck.Nickname),
 	}
 	if ck.Note != "" {
