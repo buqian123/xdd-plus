@@ -83,8 +83,6 @@ func (ck *JdCookie) Query1() string {
 
 func (ck *JdCookie) Query() string {
 	msgs := []string{
-		fmt.Sprint("京享红包任性抢！！！狂撒15天，壕气挡不住！"),
-		fmt.Sprint("https://u.jd.com/yLOMWnq"),
 		fmt.Sprintf("账号昵称：%s", ck.Nickname),
 	}
 	if ck.Note != "" {
@@ -220,6 +218,8 @@ func (ck *JdCookie) Query() string {
 		}
 		msgs = append(msgs, fmt.Sprintf("推一推券：%s", <-tyt))
 		msgs = append(msgs, fmt.Sprintf("惊喜牧场：%d枚鸡蛋🥚", <-egg))
+		msgs = append(msgs, fmt.Sprint("京享红包任性抢！！！狂撒15天，壕气挡不住！"))
+		msgs = append(msgs, fmt.Sprint("https://u.jd.com/yLOMWnq"))
 
 	} else {
 		msgs = append(msgs, []string{
