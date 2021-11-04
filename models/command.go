@@ -330,7 +330,7 @@ var codeSignals = []CodeSignal{
 	{
 		Command: []string{"查询", "query"},
 		Handle: func(sender *Sender) interface{} {
-			sender.Reply(fmt.Sprintf("京享[红包]集火力第2阶段\nhttps://u.jd.com/yInMtWy\n右上角跳转APP，不跳转试试退出微信重新登录！\n\n京享[红包]10点超级加码入口\nhttps://u.jd.com/yLnCoxs\n10点领取次数额外追加，数量有限，先到先得！先领过小红包，10点抢大红包，最高6666元！"))
+			// sender.Reply(fmt.Sprintf("京享[红包]集火力第2阶段\nhttps://u.jd.com/yInMtWy\n右上角跳转APP，不跳转试试退出微信重新登录！\n\n京享[红包]10点超级加码入口\nhttps://u.jd.com/yLnCoxs\n10点领取次数额外追加，数量有限，先到先得！先领过小红包，10点抢大红包，最高6666元！"))
 			// sender.Reply(fmt.Sprintf("鉴于腾讯针对我，查询改在TG查，TG群链接：https://t.me/joinchat/Q8gSVrUgETZmYWI1，免费机场链接：https://ikuuu.co/auth/register?code=Yw4e"))
 			if sender.IsAdmin {
 				sender.handleJdCookies(func(ck *JdCookie) {
