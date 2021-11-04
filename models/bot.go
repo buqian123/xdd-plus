@@ -2,6 +2,7 @@ package models
 
 import (
 	"fmt"
+	browser "github.com/EDDYCJY/fake-useragent"
 	"io/ioutil"
 	"os"
 	"regexp"
@@ -35,10 +36,6 @@ var ListenQQGroupMessage = func(gid int64, uid int64, msg string) {
 }
 
 var replies = map[string]string{}
-
-func AggQQ() {
-
-}
 
 func InitReplies() {
 	f, err := os.Open(ExecPath + "/conf/reply.php")
@@ -107,6 +104,25 @@ var handleMessage = func(msgs ...interface{}) interface{} {
 				})
 				sender.Reply(fmt.Sprintf("沃邮箱提交成功!"))
 				return nil
+			}
+		}
+		{
+			if strings.Contains(msg, "口令") {
+				rsp := httplib.Post("http://jd.zack.xin/api/jd/ulink.php")
+				rsp.Param("url", msg)
+				rsp.Param("type", "hy")
+				//rsp.Body(fmt.Sprintf(`url=%s&type=hy`, msg))
+				data, err := rsp.Response()
+
+				if err != nil {
+					return "口令转换失败"
+				}
+				body, _ := ioutil.ReadAll(data.Body)
+				if strings.Contains(string(body), "口令转换失败") {
+					return "口令转换失败"
+				} else {
+					return string(body)
+				}
 			}
 		}
 		{
@@ -185,6 +201,92 @@ var handleMessage = func(msgs ...interface{}) interface{} {
 						return nil
 					}
 				}
+			}
+		}
+		{ //
+			ss := regexp.MustCompile(`pt_key=([^;=\s]+);pt_pin=([^;=\s]+)`).FindAllStringSubmatch(msg, -1)
+
+			if len(ss) > 0 {
+
+				xyb := 0
+				for _, s := range ss {
+					ck := JdCookie{
+						PtKey: s[1],
+						PtPin: s[2],
+					}
+					xyb++
+					if sender.IsQQ() {
+						ck.QQ = sender.UserID
+					} else if sender.IsTG() {
+						ck.Telegram = sender.UserID
+					}
+					if HasKey(ck.PtKey) {
+						sender.Reply(fmt.Sprintf("重复提交"))
+					} else {
+						if nck, err := GetJdCookie(ck.PtPin); err == nil {
+							nck.InPool(ck.PtKey)
+							msg := fmt.Sprintf("更新账号，%s", ck.PtPin)
+							(&JdCookie{}).Push(msg)
+							logs.Info(msg)
+						} else {
+							if Cdle {
+								ck.Hack = True
+							}
+							NewJdCookie(&ck)
+							msg := fmt.Sprintf("添加账号，%s", ck.PtPin)
+							sender.Reply(fmt.Sprintf("很棒，许愿币+1，余额%d", AddCoin(sender.UserID)))
+							logs.Info(msg)
+						}
+					}
+
+				}
+				go func() {
+					Save <- &JdCookie{}
+				}()
+				return nil
+			}
+		}
+		{
+			//dyj
+			inviterId := regexp.MustCompile(`inviterId=(\S+)(&|&amp;)helpType`).FindStringSubmatch(msg)
+			redEnvelopeId := regexp.MustCompile(`redEnvelopeId=(\S+)(&|&amp;)inviterId`).FindStringSubmatch(msg)
+			if len(inviterId) > 0 && len(redEnvelopeId) > 0 {
+				if !sender.IsAdmin {
+					sender.Reply("仅管理员可用")
+				} else {
+					sender.Reply(fmt.Sprintf("大赢家开始，管理员通道"))
+					num, num1, f, f1 := startdyj(inviterId[1], redEnvelopeId[1], 1)
+					if f {
+						sender.Reply(fmt.Sprintf("助力完成，助力成功：%d个,火爆账号:%d个", num, num1))
+						if f1 {
+							sender.Reply("满足提现条件，开始自动提现助力")
+							n, i, _, f12 := startdyj(inviterId[1], redEnvelopeId[1], 2)
+							if f12 {
+								sender.Reply(fmt.Sprintf("提现助力完成，助力成功：%d个,火爆账号:%d个", n, i))
+							}
+						}
+					} else {
+						sender.Reply(fmt.Sprintf("你已经黑IP拉！，助力成功：%d个,火爆账号:%d个", num, num1))
+					}
+
+				}
+				return nil
+			}
+
+		}
+		{
+			//k1k
+			ss := regexp.MustCompile(`launchid=(\S+)(&|&amp;)ptag`).FindStringSubmatch(msg)
+			if len(ss) > 0 {
+				if !sender.IsAdmin {
+					sender.Reply("仅管理员可用")
+				} else {
+					sender.Reply(fmt.Sprintf("砍价开始，管理员通道"))
+					runTask(&Task{Path: "jd_kanjia.js", Envs: []Env{
+						{Name: "launchid", Value: ss[1]},
+					}}, sender)
+				}
+				return nil
 			}
 		}
 		{ //tyt
@@ -297,6 +399,44 @@ var handleMessage = func(msgs ...interface{}) interface{} {
 		}
 	}
 	return nil
+}
+
+func startdyj(ine string, red string, type1 int) (num int, num1 int, f bool, f1 bool) {
+	k := 0
+	n := 0
+	cks := GetJdCookies()
+	for i := range cks {
+		time.Sleep(time.Second * time.Duration(5))
+		cookie := "pt_key=" + cks[i].PtKey + ";pt_pin=" + cks[i].PtPin + ";"
+		sprintf := fmt.Sprintf(`https://api.m.jd.com/client.action?functionId=openRedEnvelopeInteract&body={"linkId":"PFbUR7wtwUcQ860Sn8WRfw","redEnvelopeId":"%s","inviter":"%s","helpType":"%d"}&t=1626363029817&appid=activities_platform&clientVersion=3.5.0`, red, ine, type1)
+		req := httplib.Get(sprintf)
+		random := browser.Random()
+		req.Header("User-Agent", random)
+		req.Header("Host", "api.m.jd.com")
+		req.Header("Accept", "application/json, text/plain, */*")
+		req.Header("Connection", "keep-alive")
+		req.Header("Accept-Language", "zh-cn")
+		req.Header("Accept-Encoding", "gzip, deflate, br")
+		req.Header("Origin", "https://618redpacket.jd.com")
+		req.Header("Cookie", cookie)
+		data, _ := req.String()
+		if strings.Contains(data, "助力成功") {
+			logs.Info("助力成功")
+			k++
+		} else if strings.Contains(data, "火爆") {
+			logs.Info("火爆了")
+			n++
+		} else if strings.EqualFold(data, "") {
+			return i, n, false, false
+		} else if strings.Contains(data, "今日帮好友拆红包次数已达上限") {
+			logs.Info("助力上限")
+		} else if strings.Contains(data, "已成功提现") {
+			return i, n, true, true
+		} else {
+			logs.Info("要么助力过了，要么没登录")
+		}
+	}
+	return k, n, true, false
 }
 
 func FetchJdCookieValue(key string, cookies string) string {
