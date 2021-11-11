@@ -1,7 +1,6 @@
 package models
 
 import (
-	"github.com/Mrs4s/MiraiGo/utils"
 	"io"
 	"io/ioutil"
 	"os"
@@ -44,6 +43,8 @@ type Yaml struct {
 	Tyt                 int    `yaml:"Tyt"`
 	IFC                 bool   `yaml:"IFC"`
 	Later               int    `yaml:"Later"`
+	Jdcurl              string `yaml:"Jdcurl"`
+	VIP                 bool
 	Node                string
 	Npm                 string
 	Python              string
@@ -119,7 +120,8 @@ func initConfig() {
 		Config.Npm = "npm"
 	}
 	if Config.ApiToken == "" {
-		Config.ApiToken = utils.RandomString(17)
+		Config.ApiToken = ""
+		//Config.ApiToken = utils.RandomString(17)
 	}
 	if Config.Node == "" {
 		Config.Node = "node"

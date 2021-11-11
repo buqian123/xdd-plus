@@ -126,9 +126,10 @@ func Main() {
 	// 	resetWorkDir(*wd)
 	// }
 
-	// 通过-c 参数替换 配置文件路径
-	// config.DefaultConfigFile = models.ExecPath + "/qbot"
-	// conf = config.Get()
+	////通过-c 参数替换 配置文件路径
+	//config.DefaultConfigFile = models.ExecPath + "/qbot/config.yml"
+	//conf = config.Get()
+	//
 
 	if models.Config.QbotConfigFile != "" {
 		config.DefaultConfigFile = models.Config.QbotConfigFile
@@ -136,6 +137,7 @@ func Main() {
 	} else {
 		conf = &config.Config{}
 	}
+
 	// if *debug {
 	// 	conf.Output.Debug = true
 	// }
@@ -427,12 +429,15 @@ func Main() {
 	} else {
 		coolq.SetMessageFormat(conf.Message.PostFormat)
 	}
+
 	coolq.IgnoreInvalidCQCode = conf.Message.IgnoreInvalidCQCode
 	coolq.SplitURL = conf.Message.FixURL
 	coolq.ForceFragmented = conf.Message.ForceFragment
 	coolq.RemoveReplyAt = conf.Message.RemoveReplyAt
 	coolq.ExtraReplyData = conf.Message.ExtraReplyData
 	coolq.SkipMimeScan = conf.Message.SkipMimeScan
+	//加载WS地址
+
 	for _, m := range conf.Servers {
 		if h, ok := m["http"]; ok {
 			hc := new(config.HTTPServer)
