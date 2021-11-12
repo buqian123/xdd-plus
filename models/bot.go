@@ -211,6 +211,10 @@ var handleMessage = func(msgs ...interface{}) interface{} {
 							if !success {
 								//s.Reply("滑块验证失败：" + string(data))
 							}
+							if i > 5 {
+								sender.Reply("滑块验证失败,请联系管理员或者手动登录")
+								break
+							}
 							if status == 666 {
 								i++
 								sender.Reply(fmt.Sprintf("正在进行第%d次滑块验证...", i))
@@ -223,7 +227,6 @@ var handleMessage = func(msgs ...interface{}) interface{} {
 								i = 6
 								sender.Reply(message)
 							}
-							i++
 							//sender.Reply(message)
 						}
 					} else {
