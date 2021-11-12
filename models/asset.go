@@ -218,9 +218,6 @@ func (ck *JdCookie) Query() string {
 		}
 		msgs = append(msgs, fmt.Sprintf("推一推券：%s", <-tyt))
 		msgs = append(msgs, fmt.Sprintf("惊喜牧场：%d枚鸡蛋🥚", <-egg))
-		msgs = append(msgs, fmt.Sprint("京享红包任性抢！！！狂撒15天，壕气挡不住！"))
-		msgs = append(msgs, fmt.Sprint("https://u.jd.com/yLOMWnq"))
-
 	} else {
 		msgs = append(msgs, []string{
 			"提醒：该账号已过期，请重新登录；QQ发送ck请添加机器人为好友，更新成功有提示。务必看到提示，如没有提示，请删除机器人好友重新加。",
