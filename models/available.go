@@ -233,7 +233,7 @@ func CookieOK(ck *JdCookie) bool {
 	if ck == nil {
 		return true
 	}
-	uri, err := url.Parse("http://8.218.161.168:1080/")
+	uri, err := url.Parse("http://118.190.244.234:3128/")
 
 	if err != nil {
 		log.Fatal("parse url error: ", err)
