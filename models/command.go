@@ -302,6 +302,16 @@ var codeSignals = []CodeSignal{
 	},
 
 	{
+		Command: []string{"开始检测"},
+		Admin:   true,
+		Handle: func(sender *Sender) interface{} {
+			sender.Reply("开始检测所有账号")
+			initCookie()
+			return "检测完成"
+		},
+	},
+
+	{
 		Command: []string{"升级", "更新", "update", "upgrade"},
 		Admin:   true,
 		Handle: func(sender *Sender) interface{} {
@@ -358,15 +368,16 @@ var codeSignals = []CodeSignal{
 	{
 		Command: []string{"查询", "query"},
 		Handle: func(sender *Sender) interface{} {
-			// sender.Reply(fmt.Sprintf("京享[红包]集火力第2阶段\nhttps://u.jd.com/yInMtWy\n右上角跳转APP，不跳转试试退出微信重新登录！\n\n京享[红包]10点超级加码入口\nhttps://u.jd.com/yLnCoxs\n10点领取次数额外追加，数量有限，先到先得！先领过小红包，10点抢大红包，最高6666元！"))
-			// sender.Reply(fmt.Sprintf("鉴于腾讯针对我，查询改在TG查，TG群链接：https://t.me/joinchat/Q8gSVrUgETZmYWI1，免费机场链接：https://ikuuu.co/auth/register?code=Yw4e"))
+			sender.Reply("如果您有多个账号，将依次为您展示查询结果：")
 			if sender.IsAdmin {
 				sender.handleJdCookies(func(ck *JdCookie) {
+					time.Sleep(time.Second * time.Duration(Config.Later))
 					sender.Reply(ck.Query())
 				})
 			} else {
 				if getLimit(sender.UserID, 1) {
 					sender.handleJdCookies(func(ck *JdCookie) {
+						time.Sleep(time.Second * time.Duration(Config.Later))
 						sender.Reply(ck.Query())
 					})
 				} else {
@@ -380,21 +391,21 @@ var codeSignals = []CodeSignal{
 	{
 		Command: []string{"详细查询", "query"},
 		Handle: func(sender *Sender) interface{} {
-			sender.Reply(fmt.Sprintf("鉴于腾讯针对我，查询改在TG查，TG群链接：https://t.me/joinchat/Q8gSVrUgETZmYWI1，免费机场链接：https://ikuuu.co/auth/register?code=Yw4e"))
-			// if sender.IsAdmin {
-			// 	sender.handleJdCookies(func(ck *JdCookie) {
-			// 		sender.Reply(ck.Query1())
-			// 	})
-			// } else {
-			// 	if getLimit(sender.UserID, 1) {
-			// 		sender.handleJdCookies(func(ck *JdCookie) {
-			// 			sender.Reply(ck.Query1())
-			// 		})
-			// 	} else {
-			// 		sender.Reply(fmt.Sprintf("鉴于东哥对接口限流，为了不影响大家的任务正常运行，即日起每日限流%d次，已超过今日限制", Config.Lim))
-			// 	}
-			// }
-
+			if sender.IsAdmin {
+				sender.handleJdCookies(func(ck *JdCookie) {
+					time.Sleep(time.Second * time.Duration(Config.Later))
+					sender.Reply(ck.Query1())
+				})
+			} else {
+				if getLimit(sender.UserID, 1) {
+					time.Sleep(time.Second * time.Duration(Config.Later))
+					sender.handleJdCookies(func(ck *JdCookie) {
+						sender.Reply(ck.Query1())
+					})
+				} else {
+					sender.Reply(fmt.Sprintf("鉴于东哥对接口限流，为了不影响大家的任务正常运行，即日起每日限流%d次，已超过今日限制", Config.Lim))
+				}
+			}
 			return nil
 		},
 	},
@@ -478,39 +489,45 @@ var codeSignals = []CodeSignal{
 	{
 		Command: []string{"梭哈", "拼了", "梭了"},
 		Handle: func(sender *Sender) interface{} {
-			u := &User{}
-			cost := GetCoin(sender.UserID)
+			if Config.GAMEOPEN {
 
-			if cost <= 0 || cost > 10000 {
-				cost = 1
-			}
+				u := &User{}
+				cost := GetCoin(sender.UserID)
 
-			if err := db.Where("number = ?", sender.UserID).First(u).Error; err != nil || u.Coin < cost {
-				return "互助值不足，先去打卡吧。"
-			} else {
-				sender.Reply(fmt.Sprintf("你使用%d枚互助值。", cost))
-			}
-			baga := 0
-			if u.Coin > 100000 {
-				baga = u.Coin
-				cost = u.Coin
-			}
-			r := time.Now().Nanosecond() % 10
-			if r < 7 || baga > 0 {
-				sender.Reply(fmt.Sprintf("很遗憾你失去了%d枚互助值。", cost))
-				cost = -cost
-			} else {
-				if r == 9 {
-					cost *= 4
-					sender.Reply(fmt.Sprintf("恭喜你4倍暴击获得%d枚互助值，20秒后自动转入余额。", cost))
-					time.Sleep(time.Second * 20)
-				} else {
-					sender.Reply(fmt.Sprintf("很幸运你获得%d枚互助值，10秒后自动转入余额。", cost))
-					time.Sleep(time.Second * 10)
+				if cost <= 0 || cost > 10000 {
+					cost = 1
 				}
-				sender.Reply(fmt.Sprintf("%d枚互助值已到账。", cost))
+
+				if err := db.Where("number = ?", sender.UserID).First(u).Error; err != nil || u.Coin < cost {
+					return "互助值不足，先去打卡吧。"
+				} else {
+					sender.Reply(fmt.Sprintf("你使用%d枚互助值。", cost))
+				}
+				baga := 0
+				if u.Coin > 100000 {
+					baga = u.Coin
+					cost = u.Coin
+				}
+				r := time.Now().Nanosecond() % 10
+				if r < 7 || baga > 0 {
+					sender.Reply(fmt.Sprintf("很遗憾你失去了%d枚互助值。", cost))
+					cost = -cost
+				} else {
+					if r == 9 {
+						cost *= 4
+						sender.Reply(fmt.Sprintf("恭喜你4倍暴击获得%d枚互助值，20秒后自动转入余额。", cost))
+						time.Sleep(time.Second * 20)
+					} else {
+						sender.Reply(fmt.Sprintf("很幸运你获得%d枚互助值，10秒后自动转入余额。", cost))
+						time.Sleep(time.Second * 10)
+					}
+					sender.Reply(fmt.Sprintf("%d枚互助值已到账。", cost))
+				}
+				db.Model(u).Update("coin", gorm.Expr(fmt.Sprintf("coin + %d", cost)))
+			} else {
+				return "该功能已禁用"
 			}
-			db.Model(u).Update("coin", gorm.Expr(fmt.Sprintf("coin + %d", cost)))
+
 			return nil
 		},
 	},
@@ -536,36 +553,40 @@ var codeSignals = []CodeSignal{
 	{
 		Command: []string{"赌一把"},
 		Handle: func(sender *Sender) interface{} {
-
-			cost := Int(sender.JoinContens())
-			if cost <= 0 || cost > 10000 {
-				cost = 1
-			}
-			u := &User{}
-			if err := db.Where("number = ?", sender.UserID).First(u).Error; err != nil || u.Coin < cost {
-				return "互助值不足，先去打卡吧。"
-			}
-			baga := 0
-			if u.Coin > 100000 {
-				baga = u.Coin
-				cost = u.Coin
-			}
-			r := time.Now().Nanosecond() % 10
-			if r < 6 || baga > 0 {
-				sender.Reply(fmt.Sprintf("很遗憾你失去了%d枚互助值。", cost))
-				cost = -cost
-			} else {
-				if r == 9 {
-					cost *= 2
-					sender.Reply(fmt.Sprintf("恭喜你幸运暴击获得%d枚互助值，20秒后自动转入余额。", cost))
-					time.Sleep(time.Second * 20)
-				} else {
-					sender.Reply(fmt.Sprintf("很幸运你获得%d枚互助值，10秒后自动转入余额。", cost))
-					time.Sleep(time.Second * 10)
+			if Config.GAMEOPEN {
+				cost := Int(sender.JoinContens())
+				if cost <= 0 || cost > 10000 {
+					cost = 1
 				}
-				sender.Reply(fmt.Sprintf("%d枚互助值已到账。", cost))
+				u := &User{}
+				if err := db.Where("number = ?", sender.UserID).First(u).Error; err != nil || u.Coin < cost {
+					return "互助值不足，先去打卡吧。"
+				}
+				baga := 0
+				if u.Coin > 100000 {
+					baga = u.Coin
+					cost = u.Coin
+				}
+				r := time.Now().Nanosecond() % 10
+				if r < 6 || baga > 0 {
+					sender.Reply(fmt.Sprintf("很遗憾你失去了%d枚互助值。", cost))
+					cost = -cost
+				} else {
+					if r == 9 {
+						cost *= 2
+						sender.Reply(fmt.Sprintf("恭喜你幸运暴击获得%d枚互助值，20秒后自动转入余额。", cost))
+						time.Sleep(time.Second * 20)
+					} else {
+						sender.Reply(fmt.Sprintf("很幸运你获得%d枚互助值，10秒后自动转入余额。", cost))
+						time.Sleep(time.Second * 10)
+					}
+					sender.Reply(fmt.Sprintf("%d枚互助值已到账。", cost))
+				}
+				db.Model(u).Update("coin", gorm.Expr(fmt.Sprintf("coin + %d", cost)))
+			} else {
+				return "该功能已禁用"
 			}
-			db.Model(u).Update("coin", gorm.Expr(fmt.Sprintf("coin + %d", cost)))
+
 			return nil
 		},
 	},

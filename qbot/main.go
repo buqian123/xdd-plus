@@ -76,15 +76,6 @@ func Main() {
 		case string:
 			if bot != nil {
 				bot.SendPrivateMessage(uid, models.Config.QQGroupID, &message.SendingMessage{Elements: []message.IMessageElement{&message.TextElement{Content: msg.(string)}}})
-				//if strings.Contains(msg.(string), "data:image") {
-				//	photo := msg.(string)
-				//	logs.Info(photo)
-				//	//b := []byte(photo)
-				//	//log.Error(b)
-				//	bot.SendPrivateMessage(uid, models.Config.QQGroupID, &message.SendingMessage{Elements: []message.IMessageElement{&coolq.LocalImageElement{File: "./output.jpg"}}})
-				//} else {
-				//	bot.SendPrivateMessage(uid, models.Config.QQGroupID, &message.SendingMessage{Elements: []message.IMessageElement{&message.TextElement{Content: msg.(string)}}})
-				//}
 			}
 		case *http.Response:
 			data, _ := ioutil.ReadAll(msg.(*http.Response).Body)
@@ -423,6 +414,10 @@ func Main() {
 			a.Accept()
 		})
 	}
+
+	bot.Client.OnTempMessage(func(qqClient *client.QQClient, event *client.TempMessageEvent) {
+		models.ListenQQPrivateMessage(event.Session.Sender, event.Message.ToString())
+	})
 
 	if conf.Message.PostFormat != "string" && conf.Message.PostFormat != "array" {
 		log.Warnf("post-format 配置错误, 将自动使用 string")

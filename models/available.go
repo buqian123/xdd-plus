@@ -13,6 +13,7 @@ import (
 
 	"github.com/beego/beego/v2/client/httplib"
 	"github.com/beego/beego/v2/core/logs"
+	"github.com/buger/jsonparser"
 )
 
 type UserInfoResult struct {
@@ -305,113 +306,21 @@ func CookieOK(ck *JdCookie) bool {
 		//	(&JdCookie{}).Push("第一个接口失效，切换到第二个接口，可能黑IP，会导致NickName获取失败，可能会自行恢复。")
 		//	Config.IFC = true
 		//}
-		b2 := av2(cookie)
-		if b2 == false {
-			if ck.Available == True {
-				ck.Update(Available, False)
-				logs.Info(ck.Available)
-				if Config.Wskey {
-					if len(ck.WsKey) > 0 {
-						var pinky = fmt.Sprintf("pin=%s;wskey=%s;", ck.PtPin, ck.WsKey)
-						msg, err := getKey(pinky)
-						if err != nil {
-							logs.Error(err)
-						}
-						//JdCookie{}.Push(fmt.Sprintf("自动转换wskey---%s", msg))
-						//缺少错误判断
-						if strings.Contains(msg, "错误") {
-							ck.Push(fmt.Sprintf("Wskey失效账号，%s", ck.PtPin))
-							(&JdCookie{}).Push(fmt.Sprintf("Wskey失效，%s", ck.PtPin))
-						} else {
-							ptKey := FetchJdCookieValue("pt_key", msg)
-							ptPin := FetchJdCookieValue("pt_pin", msg)
-							logs.Info(ptPin)
-							ck := JdCookie{
-								PtKey: ptKey,
-								PtPin: ptPin,
-							}
-							if nck, err := GetJdCookie(ptPin); err == nil {
-								nck.InPool(ck.PtKey)
-								msg := fmt.Sprintf("更新账号，%s", ck.PtPin)
-								(&JdCookie{}).Push(msg)
-								logs.Info(msg)
-							} else {
-								//nck.Update(Available, False)
-								(&JdCookie{}).Push(fmt.Sprintf("转换失败，%s", nck.PtPin))
-							}
-						}
 
-					} else {
-						ck.Push(fmt.Sprintf("失效账号，%s", ck.PtPin))
-						JdCookie{}.Push(fmt.Sprintf("失效账号，%s", ck.Nickname))
-					}
-				} else {
-					ck.Push(fmt.Sprintf("失效账号，%s", ck.PtPin))
-					JdCookie{}.Push(fmt.Sprintf("失效账号，%s", ck.Nickname))
-				}
-
-			}
-			return false
-		} else {
-			return true
-		}
+		return av2(ck)
 	}
 	//if Config.IFC {
 	//	(&JdCookie{}).Push("第一个接口恢复，切换回第一接口，恭喜你IP洗白白了")
 	//	Config.IFC = false
 	//}
 	switch ui.Retcode {
-	case "1001": //ck.BeanNum
-		if ui.Msg == "not login" {
-			if ck.Available == True {
-				ck.Update(Available, False)
-				logs.Info(ck.Available)
-				if Config.Wskey {
-					if len(ck.WsKey) > 0 {
-						var pinky = fmt.Sprintf("pin=%s;wskey=%s;", ck.PtPin, ck.WsKey)
-						msg, err := getKey(pinky)
-						if err != nil {
-							logs.Error(err)
-						}
-						//JdCookie{}.Push(fmt.Sprintf("自动转换wskey---%s", msg))
-						//缺少错误判断
-						if strings.Contains(msg, "错误") {
-							ck.Push(fmt.Sprintf("Wskey失效账号，%s", ck.PtPin))
-							(&JdCookie{}).Push(fmt.Sprintf("Wskey失效，%s", ck.PtPin))
-						} else {
-							ptKey := FetchJdCookieValue("pt_key", msg)
-							ptPin := FetchJdCookieValue("pt_pin", msg)
-							logs.Info(ptPin)
-							ck := JdCookie{
-								PtKey: ptKey,
-								PtPin: ptPin,
-							}
-							if nck, err := GetJdCookie(ptPin); err == nil {
-								nck.InPool(ck.PtKey)
-								msg := fmt.Sprintf("更新账号，%s", ck.PtPin)
-								(&JdCookie{}).Push(msg)
-								logs.Info(msg)
-							} else {
-								//nck.Update(Available, False)
-								(&JdCookie{}).Push(fmt.Sprintf("转换失败，%s", nck.PtPin))
-							}
-						}
-
-					} else {
-						ck.Push(fmt.Sprintf("失效账号，%s", ck.PtPin))
-						JdCookie{}.Push(fmt.Sprintf("失效账号，%s", ck.Nickname))
-					}
-				} else {
-					ck.Push(fmt.Sprintf("失效账号，%s", ck.PtPin))
-					JdCookie{}.Push(fmt.Sprintf("失效账号，%s", ck.Nickname))
-				}
-
-			}
-			return false
-		}
+	//case "1001": //ck.BeanNum
+	//	if ui.Msg == "not login" {
+	//		return false
+	//	}
 	case "0":
 		if url.QueryEscape(ui.Data.UserInfo.BaseInfo.CurPin) != ck.PtPin {
-			return av2(cookie)
+			return av2(ck)
 		}
 		if ui.Data.UserInfo.BaseInfo.Nickname != ck.Nickname || ui.Data.AssetInfo.BeanNum != ck.BeanNum || ui.Data.UserInfo.BaseInfo.UserLevel != ck.UserLevel || ui.Data.UserInfo.BaseInfo.LevelName != ck.LevelName {
 			ck.Updates(JdCookie{
@@ -429,10 +338,11 @@ func CookieOK(ck *JdCookie) bool {
 		return true
 	}
 	//(&JdCookie{}).Push("第一个接口失效，切换到第二个接口，可能黑IP")
-	return av2(cookie)
+	return av2(ck)
 }
 
-func av2(cookie string) bool {
+func av2(ck *JdCookie) bool {
+	cookie := "pt_key=" + ck.PtKey + ";pt_pin=" + ck.PtPin + ";"
 	req := httplib.Get(`https://m.jingxi.com/user/info/GetJDUserBaseInfo?_=1629334995401&sceneval=2&g_login_type=1&g_ty=ls`)
 	req.Header("User-Agent", ua)
 	req.Header("Host", "m.jingxi.com")
@@ -442,20 +352,14 @@ func av2(cookie string) bool {
 	req.Header("Accept-Encoding", "gzip, deflate, br")
 	req.Header("Referer", "https://st.jingxi.com/my/userinfo.html?&ptag=7205.12.4")
 	req.Header("Cookie", cookie)
-	data, err := req.String()
+	data, err := req.Bytes()
 	if err != nil {
 		return true
 	}
-	if strings.Contains(data, "login") {
-		return false
-	} else if strings.Contains(data, "nickname") {
-		return true
-	} else {
-		if !Config.IFC {
-			(&JdCookie{}).Push("全部接口都失效，现已无法检测，可能黑IP，会导致NickName获取失败，可能会自行恢复。")
-			Config.IFC = true
-		}
-		return true
+	if ck.Nickname == "" {
+		ck.Nickname, _ = jsonparser.GetString(data, "nickname")
+		ck.Update("Nickname", ck.Nickname)
+		logs.Info("开始补齐NickName")
 	}
-	return !strings.Contains(data, "login")
+	return !strings.Contains(string(data), "login")
 }
